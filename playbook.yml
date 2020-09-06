@@ -1,0 +1,35 @@
+---
+- hosts: all
+  become: yes
+  user: vagrant
+  vars:
+    TIMEZONE: UTC
+    REDMINE_VERSION: 4.0.5
+    RUBY_VERSION: 2.7
+  tasks:
+    - name: Set timezone to {{ TIMEZONE }}
+      timezone:
+        name: "{{ TIMEZONE }}"
+
+    - name: Selinux set permissive mode
+      selinux:
+        policy: targeted
+        state: permissive
+
+    - name: Add Docker repository
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/
+
+    - name: Install packages
+      yum:
+        name:
+          - epel-release
+          - docker-ce
+        update_cache: yes
+        
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
